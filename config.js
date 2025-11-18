@@ -6,7 +6,7 @@ module.exports = {
 
   // Bot Activity
   activity: {
-    name: 'INFNITY MUSIC',
+    name: '/help | https://github.com/Unknownzop/MusicBot',
     type: 'LISTENING' // PLAYING, STREAMING, LISTENING, WATCHING, COMPETING
   },
 
@@ -29,6 +29,7 @@ module.exports = {
   
   // Support Server Link
   support: {
+    // Make sure to set SUPPORT_SERVER in your .env file
     server: process.env.SUPPORT_SERVER || 'https://discord.gg/your-support-server-invite'
   },
 
@@ -47,10 +48,23 @@ module.exports = {
     success: '✅',
     error: '❌',
     warning: '⚠️',
-    music: '🎶',
-    stats: '📊',
-    // New Emojis for Help Menu Buttons
+    music: '🎶', // Used for music category
+    stats: '📊', // Used for utility category
+    // Emojis for buttons/mentions
     invite: '🔗', 
-    support: '🛠️'
+    support: '🛠️',
+    // Additional utility emojis (may not be used in the current index.js, but useful)
+    user: '👤',
+    duration: '⏱️',
+    position: '📍',
+    ping: '🏓',
+    uptime: '⌚',
+    servers: '🌐',
+    users: '👥',
+    channels: '💬',
+    memory: '🧠',
+    platform: '💻',
+    node: '🟢',
+    api: '📡'
   }
 };
