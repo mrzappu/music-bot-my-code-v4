@@ -4,9 +4,9 @@ module.exports = {
   prefix: '!',
   enablePrefix: true, // Set to false to disable prefix commands
   
-  // Bot Activity
+  // Bot Activity - THEME CHANGE
   activity: {
-    name: '/help | https://github.com/Unknownzop/MusicBot',
+    name: 'Neon Beats 🎶 | /help',
     type: 'LISTENING' // PLAYING, STREAMING, LISTENING, WATCHING, COMPETING
   },
   
@@ -15,17 +15,16 @@ module.exports = {
     nodes: [{
       name: 'main',
       url: 'lava-v4.ajieblogs.eu.org:80',
-      // CRITICAL: Must be a simple password string.
       auth: 'youshallnotpass', 
       secure: false,
     }],
     defaultSearchEngine: 'youtube_music'
   },
   
-  // Emojis
+  // Emojis - FULL THEME CHANGE
   emojis: {
-    // Custom Animated Emoji (external)
-    play: '<a:custom_play:1331477113911382079>',
+    // FIX: Updated to the new ID 1440284078875213854
+    play: '<a:custom_play:1440284078875213854>', 
     
     // Custom Static Emojis (external)
     pause: '<:e_pause:1431124345194807369>',
@@ -37,26 +36,26 @@ module.exports = {
     volume: '<:e_volume:1431123744402968636>',
     
     // Functional Unicode emoji
-    nowplaying: '🎵', 
+    nowplaying: '🎶', 
     
-    // Other Unicode Emojis
+    // Other Unicode Emojis (Themed)
     queue: '📜',
     success: '✅',
     error: '❌',
     warning: '⚠️',
-    music: '🎵',
-    user: '👤',
-    duration: '⏱️',
+    music: '🎶',
+    user: '🤖',
+    duration: '⏳',
     position: '📍',
-    ping: '🏓',
-    stats: '📊',
-    invite: '📨',
-    support: '💬',
-    uptime: '⌚',
-    servers: '🌐',
-    users: '👥',
-    players: '🎵',
-    playlist: '📋'
+    ping: '📡',
+    stats: '📈',
+    invite: '🔗',
+    support: '📣',
+    uptime: '🔋',
+    servers: '🌌',
+    users: '👾',
+    players: '🎶',
+    playlist: '📀'
   },
   
   // URLs
