@@ -15,7 +15,7 @@ module.exports = {
     nodes: [{
       name: 'main',
       url: 'lava-v4.ajieblogs.eu.org:80',
-      // FIX: Changed from URL to the correct password string.
+      // CRITICAL: Must be a simple password string.
       auth: 'youshallnotpass', 
       secure: false,
     }],
@@ -24,16 +24,23 @@ module.exports = {
   
   // Emojis
   emojis: {
-    play: '▶️',
-    pause: '⏸️',
-    resume: '▶️',
-    skip: '⏭️',
-    stop: '⏹️',
+    // Custom Animated Emoji (external)
+    play: '<a:custom_play:1331477113911382079>',
+    
+    // Custom Static Emojis (external)
+    pause: '<:e_pause:1431124345194807369>',
+    resume: '<:e_resume:1431123161885446145>',
+    skip: '<:e_skip:1431123075121942528>',
+    stop: '<:e_stop:1431123342244446268>',
+    shuffle: '<:e_shuffle:1431123222807580724>',
+    loop: '<:e_loop:1431123277148848212>',
+    volume: '<:e_volume:1431123744402968636>',
+    
+    // Functional Unicode emoji
+    nowplaying: '🎵', 
+    
+    // Other Unicode Emojis
     queue: '📜',
-    shuffle: '🔀',
-    loop: '🔄',
-    volume: '🔊',
-    nowplaying: ':music_disc:',
     success: '✅',
     error: '❌',
     warning: '⚠️',
