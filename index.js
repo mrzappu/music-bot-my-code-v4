@@ -23,12 +23,10 @@ const { Kazagumo, KazagumoTrack } = require('kazagumo');
 const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildVoiceStates,
+  // MessageContent intent is required for the mention handler and prefix commands
+  GatewayIntentBits.GuildMessages, 
+  GatewayIntentBits.MessageContent 
 ];
-
-// Only add MessageContent intent if prefix commands are enabled
-if (config.enablePrefix) {
-  intents.push(GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent);
-}
 
 const client = new Client({ intents });
 
@@ -300,121 +298,6 @@ async function getOrCreatePlayer(interaction, voiceChannel) {
   return player;
 }
 
-/**
- * Creates the initial help menu embed.
- * @returns {EmbedBuilder}
- */
-function createMainHelpEmbed() {
-  return new EmbedBuilder()
-    .setTitle(`🎧 INFINITY MUSIC - Help Menu`)
-    .setDescription(`Welcome to the **Infinity Music** help section! Use the menu below to browse commands by category.`)
-    .addFields(
-      { name: '🌐 Quick Info', value: `> **Total Servers:** \`${client.guilds.cache.size}\`\n> **Latency:** \`${client.ws.ping}ms\``, inline: true },
-      { name: '❓ How to use', value: '> Start by selecting a category from the dropdown menu.', inline: true }
-    )
-    .setColor('#0099ff')
-    .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-    .setFooter({ text: `Type / for slash commands | Developed by Unknownzop`, iconURL: client.user.displayAvatarURL({ dynamic: true }) })
-    .setTimestamp();
-}
-
-/**
- * Creates the music commands embed.
- * @returns {EmbedBuilder}
- */
-function createMusicEmbed() {
-  return new EmbedBuilder()
-    .setTitle(`${config.emojis.music} Music Commands`)
-    .setDescription(`Commands used to play, control, and manage music playback.`)
-    .addFields(
-      { name: '`/play <query>`', value: 'Plays a song or adds it to the queue.', inline: false },
-      { name: '`/skip`', value: 'Skips the current song.', inline: true },
-      { name: '`/stop`', value: 'Stops the music and clears the queue.', inline: true },
-      { name: '`/pause`', value: 'Pauses the current song.', inline: true },
-      { name: '`/resume`', value: 'Resumes the current song.', inline: true },
-      { name: '`/queue`', value: 'Displays the current queue.', inline: true },
-      { name: '`/nowplaying`', value: 'Shows the current playing song.', inline: true },
-      { name: '`/shuffle`', value: 'Shuffles the queue.', inline: true },
-      { name: '`/loop <mode>`', value: 'Sets the loop mode (none/track/queue).', inline: true },
-      { name: '`/volume <level>`', value: 'Adjusts the player volume (0-100).', inline: true },
-      { name: '`/247`', value: 'Toggles 24/7 mode.', inline: true }
-    )
-    .setColor('#00ff00')
-    .setTimestamp();
-}
-
-/**
- * Creates the utility commands embed.
- * @returns {EmbedBuilder}
- */
-function createUtilityEmbed() {
-  return new EmbedBuilder()
-    .setTitle(`${config.emojis.stats} Utility Commands`)
-    .setDescription(`General purpose commands for information and bot status.`)
-    .addFields(
-      { name: '`/help`', value: 'Shows this interactive help menu.', inline: false }
-    )
-    .setColor('#FFC0CB')
-    .setTimestamp();
-}
-
-/**
- * Creates the action row with link buttons (Invite and Support).
- * @returns {ActionRowBuilder}
- */
-function createLinkButtons() {
-  // Use a dummy invite link here since the real one isn't in config
-  const botInviteLink = `https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=2184323648&scope=bot%20applications.commands`;
-
-  return new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setLabel('Invite Bot')
-        .setURL(botInviteLink)
-        .setStyle(ButtonStyle.Link)
-        .setEmoji(config.emojis.invite),
-      new ButtonBuilder()
-        .setLabel('Support Server')
-        .setURL(config.support.server)
-        .setStyle(ButtonStyle.Link)
-        .setEmoji(config.emojis.support)
-    );
-}
-
-/**
- * Creates the action row with the category select menu.
- * @returns {ActionRowBuilder}
- */
-function createSelectMenu() {
-  return new ActionRowBuilder()
-    .addComponents(
-      new StringSelectMenuBuilder()
-        .setCustomId('help_menu_select')
-        .setPlaceholder('Select a command category...')
-        .addOptions([
-          {
-            label: 'Home',
-            description: 'Go back to the main help menu.',
-            value: 'home',
-            emoji: '🏠',
-          },
-          {
-            label: 'Music Commands',
-            description: 'Shows all music playback commands.',
-            value: 'music',
-            emoji: config.emojis.music,
-          },
-          {
-            label: 'Utility Commands',
-            description: 'Shows utility and information commands.',
-            value: 'utility',
-            emoji: config.emojis.stats,
-          },
-        ]),
-    );
-}
-
-
 // Slash Command Handler
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
@@ -438,17 +321,21 @@ client.on('interactionCreate', async interaction => {
   if (['help', 'play'].includes(commandName)) {
     // 'help' command
     if (commandName === 'help') {
-      const mainEmbed = createMainHelpEmbed();
-      const buttons = createLinkButtons();
-      const selectMenu = createSelectMenu();
+      const helpEmbed = new EmbedBuilder()
+        .setTitle(`${client.user.username} Commands`)
+        .setDescription('Use **/** for all commands.')
+        .addFields(
+          { name: '🎵 Music Commands', value: '`/play`, `/skip`, `/stop`, `/pause`, `/resume`, `/queue`, `/nowplaying`, `/shuffle`, `/loop`, `/volume`, `/247`' },
+          { name: 'ℹ️ Utility', value: '`/help`' }
+        )
+        .setColor('#00ff00')
+        .setFooter({ text: `Developed by Unknownzop | Support: ${config.support.server}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) })
+        .setTimestamp();
 
-      return interaction.reply({ 
-        embeds: [mainEmbed],
-        components: [selectMenu, buttons]
-      });
+      return interaction.reply({ embeds: [helpEmbed] });
     }
 
-    // FIX: 'play' command updated for proper flow and response
+    // 'play' command updated for proper flow and response
     if (commandName === 'play') {
       await interaction.deferReply(); // Acknowledge the command first 
       const query = options.getString('query');
@@ -487,10 +374,15 @@ client.on('interactionCreate', async interaction => {
             return interaction.editReply({ embeds: [startingEmbed] });
           }
 
+          // --- MODIFIED: NEW "TRACK ADDED" EMBED (based on Screenshot 2025-11-18 035756.png) ---
           const addedEmbed = new EmbedBuilder()
-            .setDescription(`${config.emojis.success} Added [${track.title}](${track.uri}) to the queue at position **#${player.queue.length}**.`)
-            .setColor('#00ff00');
+            .setTitle('Track Added') 
+            .setDescription(`Added [${track.title}](${track.uri}) - \`${track.duration.asString()}\`.`)
+            .setThumbnail(track.thumbnail || null)
+            .setColor('#2ecc71');
+
           return interaction.editReply({ embeds: [addedEmbed] });
+          // --- END MODIFIED LOGIC ---
         }
       } catch (error) {
         console.error('Play command error:', error);
@@ -631,109 +523,113 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-// Button and Select Menu Interaction Handler
+// Button Interaction Handler
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
+  if (!interaction.isButton()) return;
   if (!interaction.guild) return;
 
-  // Handle Select Menu for Help Command
-  if (interaction.isStringSelectMenu() && interaction.customId === 'help_menu_select') {
-    await interaction.deferUpdate();
-    const [selection] = interaction.values;
-    const buttons = createLinkButtons();
-    const selectMenu = createSelectMenu();
-    let newEmbed;
+  const player = kazagumo.players.get(interaction.guildId);
+  if (!player) return interaction.reply({ content: `${config.emojis.warning} There is no music currently playing.`, flags: 64 });
 
-    switch (selection) {
-      case 'home':
-        newEmbed = createMainHelpEmbed();
-        break;
-      case 'music':
-        newEmbed = createMusicEmbed();
-        break;
-      case 'utility':
-        newEmbed = createUtilityEmbed();
-        break;
-      default:
-        newEmbed = createMainHelpEmbed();
-        break;
-    }
-
-    try {
-      await interaction.editReply({ embeds: [newEmbed], components: [selectMenu, buttons] });
-    } catch (error) {
-      console.error('Error editing help menu on select:', error);
-      await interaction.followUp({ content: `${config.emojis.error} Failed to update the help menu.`, flags: 64 });
-    }
-    return;
+  const member = interaction.member;
+  if (!member.voice.channel || member.voice.channel.id !== player.voiceId) {
+    return interaction.reply({ content: `${config.emojis.error} You must be in the same voice channel as the bot to use the controls.`, flags: 64 });
   }
 
-  // Continue with Button Interaction Handler (Music Controls)
-  if (interaction.isButton()) {
-      const player = kazagumo.players.get(interaction.guildId);
-      if (!player) return interaction.reply({ content: `${config.emojis.warning} There is no music currently playing.`, flags: 64 });
+  await interaction.deferUpdate();
 
-      const member = interaction.member;
-      if (!member.voice.channel || member.voice.channel.id !== player.voiceId) {
-        return interaction.reply({ content: `${config.emojis.error} You must be in the same voice channel as the bot to use the controls.`, flags: 64 });
-      }
-
-      await interaction.deferUpdate();
-
-      try {
-        switch (interaction.customId) {
-          case 'pause':
-          case 'resume':
-            player.pause(!player.paused);
-            break;
-          case 'skip':
-            if (player.queue.length > 0) {
-                await player.skip();
-            } else {
-                // If no more tracks, destroy the player
-                player.destroy();
-                // Edit the last message to disable buttons after stop
-                if (interaction.message && interaction.message.editable) {
-                    const disabledButtons = interaction.message.components[0].components.map(button => 
-                        ButtonBuilder.from(button).setDisabled(true)
-                    );
-                    await interaction.message.edit({ components: [new ActionRowBuilder().addComponents(disabledButtons)] });
-                }
-            }
-            break;
-          case 'stop':
+  try {
+    switch (interaction.customId) {
+      case 'pause':
+      case 'resume':
+        player.pause(!player.paused);
+        break;
+      case 'skip':
+        if (player.queue.length > 0) {
+            await player.skip();
+        } else {
+            // If no more tracks, destroy the player
             player.destroy();
-            // Edit the last message to disable buttons
+            // Edit the last message to disable buttons after stop
             if (interaction.message && interaction.message.editable) {
                 const disabledButtons = interaction.message.components[0].components.map(button => 
                     ButtonBuilder.from(button).setDisabled(true)
                 );
                 await interaction.message.edit({ components: [new ActionRowBuilder().addComponents(disabledButtons)] });
             }
-            break;
-          case 'loop':
-            // Cycle through loop modes: none -> track -> queue -> none
-            let newLoopMode = 'none';
-            if (player.loop === 'none') {
-              newLoopMode = 'track';
-            } else if (player.loop === 'track') {
-              newLoopMode = 'queue';
-            }
-            player.setLoop(newLoopMode);
-            // Optional: send a temporary follow-up message to confirm loop change
-            await interaction.followUp({ content: `${config.emojis.loop} Loop mode set to **${newLoopMode}**!`, flags: 64 });
-            break;
-          case 'shuffle':
-            player.queue.shuffle();
-            await interaction.followUp({ content: `${config.emojis.shuffle} Queue shuffled!`, flags: 64 });
-            break;
         }
-      } catch (error) {
-        console.error('Button interaction error:', error);
-        await interaction.followUp({ content: `${config.emojis.error} An error occurred while processing your request.`, flags: 64 });
-      }
+        break;
+      case 'stop':
+        player.destroy();
+        // Edit the last message to disable buttons
+        if (interaction.message && interaction.message.editable) {
+            const disabledButtons = interaction.message.components[0].components.map(button => 
+                ButtonBuilder.from(button).setDisabled(true)
+            );
+            await interaction.message.edit({ components: [new ActionRowBuilder().addComponents(disabledButtons)] });
+        }
+        break;
+      case 'loop':
+        // Cycle through loop modes: none -> track -> queue -> none
+        let newLoopMode = 'none';
+        if (player.loop === 'none') {
+          newLoopMode = 'track';
+        } else if (player.loop === 'track') {
+          newLoopMode = 'queue';
+        }
+        player.setLoop(newLoopMode);
+        // Optional: send a temporary follow-up message to confirm loop change
+        await interaction.followUp({ content: `${config.emojis.loop} Loop mode set to **${newLoopMode}**!`, flags: 64 });
+        break;
+      case 'shuffle':
+        player.queue.shuffle();
+        await interaction.followUp({ content: `${config.emojis.shuffle} Queue shuffled!`, flags: 64 });
+        break;
+    }
+  } catch (error) {
+    console.error('Button interaction error:', error);
+    await interaction.followUp({ content: `${config.emojis.error} An error occurred while processing your request.`, flags: 64 });
   }
 });
+
+
+// --- NEW BOT MENTION HANDLER (Based on Screenshot 2025-11-18 040116.png) ---
+client.on('messageCreate', async (message) => {
+  // Ignore messages from bots or outside a guild
+  if (message.author.bot || !message.guild) return;
+
+  // Check if the message content is only a mention of the bot
+  const botMention = new RegExp(`^<@!?${client.user.id}>$`);
+  if (message.content.match(botMention)) {
+    
+    // Create the embed matching the user's requested style
+    const mentionEmbed = new EmbedBuilder()
+      .setTitle('Bot Settings')
+      .setDescription(
+        `My Prefix : **/** (Slash) & **${config.prefix}**. Use **/help** for commands.\n` +
+        `Use **/play Song Name** to play music.`
+      )
+      .addFields(
+        { name: 'Thank you For Choosing Me', value: '\u200b', inline: false } // \u200b for a blank value
+      )
+      // !!! IMPORTANT: Replace this placeholder URL with your actual hosted image link for the banner !!!
+      .setImage('https://i.imgur.com/uR8Qe9d.png') // Placeholder URL for the banner image
+      .setColor('#FF0000'); // Use red color to match the image theme
+
+    // Send the response
+    return message.reply({ 
+        content: `Hey User, I am **${client.user.username}**`, // Separate text line to match image format
+        embeds: [mentionEmbed] 
+    }).catch(console.error);
+  }
+
+  // --- Handle prefix commands (optional, but good practice to keep the listener here) ---
+  if (config.enablePrefix && message.content.startsWith(config.prefix)) {
+    // Add your prefix command logic here if needed.
+  }
+});
+// --- END NEW BOT MENTION HANDLER ---
+
 
 // FIX: Renamed 'ready' to 'clientReady' here as well
 client.login(config.token);
